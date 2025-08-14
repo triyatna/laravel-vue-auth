@@ -45,13 +45,6 @@ const props = defineProps<{
                         <slot />
                     </div>
                 </section>
-
-                <p class="mt-6 text-center text-xs text-slate-500">
-                    By signing up, you agree to our
-                    <a href="/terms" class="underline" rel="noopener noreferrer">Terms</a>
-                    &amp;
-                    <a href="/privacy" class="underline" rel="noopener noreferrer">Privacy Policy</a>.
-                </p>
             </div>
         </main>
     </div>

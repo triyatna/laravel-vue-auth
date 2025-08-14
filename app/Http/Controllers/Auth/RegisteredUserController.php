@@ -13,7 +13,7 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 
-use App\Http\Helpers\TyFunction;
+use App\Helpers\TyFunction;
 use Illuminate\Support\Str;
 
 class RegisteredUserController extends Controller
@@ -33,14 +33,24 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'username' => 'required|string|max:255|unique:' . User::class,
-            'phone' => 'required|string|max:20|regex:/^\+?\d{8,15}$/',
-            'referral_code' => 'nullable|string|max:255',
-        ]);
+        $request->validate(
+            [
+                'name'      => ['required', 'string', 'max:255'],
+                'email'     => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+                'password'  => ['required', 'confirmed', Rules\Password::defaults()],
+                'username'  => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9]+$/', 'unique:users,username'],
+                'phone'     => ['required', 'string', 'regex:/^\+?[1-9]\d{7,14}$/'],
+                'referral_code' => 'nullable|string|max:255',
+                'terms'     => 'required|accepted',
+            ],
+            [
+                'phone.regex' => 'The phone number must be in the format +[country code][number].',
+                'email.unique' => 'The email address is already in use.',
+                'username.unique' => 'The username is already taken.',
+                'terms.accepted' => 'You must accept the terms and conditions.',
+                'username.regex' => 'Usernames can only be lowercase letters and numbers',
+            ]
+        );
         $referrerId = null;
         if (!empty($request->referral_code)) {
             $referrerId = User::where('referral_code', $request->referral_code)->value('id');

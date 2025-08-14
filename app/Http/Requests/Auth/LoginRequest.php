@@ -5,9 +5,13 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+
+use App\Models\User;
 
 class LoginRequest extends FormRequest
 {
@@ -60,6 +64,20 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    public function resolveUser(): User
+    {
+        $login = (string) $this->string('login');
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        if ($field === 'username') $login = Str::lower($login);
+
+        /** @var User|null $user */
+        $user = User::where($field, $login)->first();
+        if (!$user || ! Hash::check($this->string('password'), $user->password)) {
+            throw ValidationException::withMessages(['login' => trans('auth.failed')]);
+        }
+        return $user;
     }
 
     /**

@@ -44,7 +44,14 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => fn() => $request->user() ? array_merge(
+                    $request->user()->only('id', 'user_unique', 'name', 'username', 'email', 'phone', 'referral_code', 'avatar_path', 'two_factor_recovery_codes', 'two_factor_confirmed_at'),
+                    [
+                        'avatar_url' => $request->user()->avatar_path
+                            ? asset('storage/' . $request->user()->avatar_path . '?v=' . optional($request->user()->updated_at)->timestamp)
+                            : null,
+                    ],
+                ) : null,
             ],
             'ziggy' => [
                 ...(new Ziggy)->toArray(),

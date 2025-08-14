@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
+import PhoneInput from '@/components/PhoneInput.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
@@ -17,6 +19,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     referral_code: '', // optional
+    terms: false, // checkbox for terms agreement
 });
 
 const submit = () => {
@@ -66,22 +69,23 @@ onMounted(() => {
                         placeholder="e.g. johndoe"
                         inputmode="latin"
                     />
-                    <p class="text-xs text-muted-foreground">Huruf kecil, angka, titik atau underscore. Min 3, max 30.</p>
+
                     <InputError :message="form.errors.username" />
                 </div>
 
                 <div class="grid gap-2">
                     <Label for="phone">Phone (WhatsApp)</Label>
-                    <Input
+                    <PhoneInput
                         id="phone"
-                        type="tel"
+                        v-model="form.phone"
                         :tabindex="3"
-                        autocomplete="tel"
-                        v-model.trim="form.phone"
-                        placeholder="+6281234567890"
-                        inputmode="tel"
+                        aria-describedby="phone-help"
+                        :emoji="true"
+                        placeholder="81234567890"
+                        defaultIso="ID"
+                        :emitPlus="false"
                     />
-                    <p class="text-xs text-muted-foreground">Format internasional disarankan. Contoh: +62812xxxxxxx</p>
+
                     <InputError :message="form.errors.phone" />
                 </div>
 
@@ -131,6 +135,20 @@ onMounted(() => {
                     <Label for="referral">Referral code (optional)</Label>
                     <Input id="referral" type="text" :tabindex="7" v-model.trim="form.referral_code" placeholder="REFCODE (optional)" />
                     <InputError :message="form.errors.referral_code" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="terms" class="flex items-start gap-3 select-none">
+                        <Checkbox id="terms" v-model="form.terms" :tabindex="8" aria-describedby="terms-text" class="mt-0.5" />
+                        <span id="terms-text" class="text-sm leading-6 text-muted-foreground">
+                            By creating an account, you agree to our
+                            <TextLink href="/terms" target="_blank" class="font-medium">Terms</TextLink>
+                            and
+                            <TextLink href="/privacy" target="_blank" class="font-medium">Privacy Policy</TextLink>.
+                        </span>
+                    </Label>
+
+                    <InputError :message="form.errors.terms" />
                 </div>
 
                 <Button type="submit" class="mt-2 w-full" tabindex="8" :disabled="form.processing">

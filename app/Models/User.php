@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
@@ -12,7 +13,7 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
-
+    protected $guarded = [];
     /**
      * The attributes that are mass assignable.
      *
@@ -27,6 +28,10 @@ class User extends Authenticatable
         'phone',
         'role',
         'referral_code',
+        'avatar_path',
+        'two_factor_secret',
+        'two_factor_confirmed_at',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -49,6 +54,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_confirmed_at'   => 'datetime',
+            'two_factor_recovery_codes' => 'array',
         ];
     }
 
@@ -57,5 +64,10 @@ class User extends Authenticatable
         return Attribute::make(
             set: fn($value) => strtolower(trim($value))
         );
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return !is_null($this->two_factor_confirmated_at) && !empty($this->two_factor_secret);
     }
 }

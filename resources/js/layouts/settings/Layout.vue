@@ -18,6 +18,14 @@ const sidebarNavItems: NavItem[] = [
         title: 'Appearance',
         href: '/settings/appearance',
     },
+    {
+        title: '2FA Auth',
+        href: '/settings/security',
+    },
+    {
+        title: 'Sessions',
+        href: '/settings/sessions',
+    },
 ];
 
 const page = usePage();
