@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
-
+use App\Support\AuthChallenge;
 use App\Services\OtpService;
 
 class AuthenticatedSessionController extends Controller
@@ -37,25 +37,20 @@ class AuthenticatedSessionController extends Controller
 
         // return redirect()->intended(route('dashboard', absolute: false));
 
+        $request->authenticate();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $remember = $request->boolean('remember');
+        Auth::logout();                      // lepas login — lanjut challenge
 
-        $user = $request->resolveUser();
-        $request->session()->put('preauth_user', $user->user_unique);
-        $request->session()->put('remember', $request->boolean('remember'));
-
-        // TOTP diutamakan jika aktif
-        if ($user->two_factor_enabled && $user->two_factor_secret) {
-            return to_route('auth.totp.form')->with('status', '2FA is enabled. Please enter your TOTP code.');
+        if ($user->two_factor_confirmed_at) {
+            AuthChallenge::initTotp($request, $user->user_unique, $remember, 300);
+            return to_route('auth.totp.form');
         }
 
-        // Jika tidak aktif TOTP → kirim OTP via email (atau SMS kalau phone tersedia)
-        app(OtpService::class)->issue(
-            userUnique: $user->user_unique,
-            identifier: $user->email,     // atau $user->phone (E.164) jika mau SMS
-            channel: 'email',
-            purpose: 'login'
-        );
-
-        return to_route('auth.otp.form')->with('status', 'OTP Code has been sent to your email.');
+        app(OtpService::class)->send($user->email, $user->user_unique, 'login', 'email');
+        AuthChallenge::initOtp($request, $user->user_unique, $remember, 'login', 'email');
+        return to_route('auth.otp.form');
     }
 
     /**

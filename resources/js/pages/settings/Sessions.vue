@@ -46,7 +46,7 @@ function cancelConfirm() {
     if (!form.processing) showConfirm.value = false;
 }
 function logoutOthers() {
-    form.delete(route('security.sessions.others'), {
+    form.delete(route('security.sessions.destroyOthers'), {
         onSuccess: () => {
             form.reset('password');
             showConfirm.value = false;

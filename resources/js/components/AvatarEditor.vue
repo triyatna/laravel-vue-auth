@@ -522,8 +522,12 @@ function cancelCrop() {
                         </div>
 
                         <div class="mt-6 flex items-center justify-end gap-2">
-                            <Button variant="secondary" @click="cancelCrop"><X class="mr-2 h-4 w-4" /> Cancel</Button>
-                            <Button @click="saveCropped">Save</Button>
+                            <Button variant="secondary" @click="cancelCrop" :disabled="form.processing"
+                                ><X class="mr-2 h-4 w-4" /> <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />Cancel</Button
+                            >
+                            <Button @click="saveCropped" :disabled="form.processing">
+                                <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />Save</Button
+                            >
                         </div>
                     </div>
                 </div>

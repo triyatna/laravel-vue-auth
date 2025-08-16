@@ -28,11 +28,15 @@ Route::middleware('auth')->group(function () {
         ->name('settings.sessions');
 });
 
-Route::middleware('throttle:otp')->group(function () {
+Route::middleware(['auth.challenge:otp'])->group(function () {
     Route::get('/auth/otp',  [\App\Http\Controllers\Auth\OtpController::class, 'create'])->name('auth.otp.form');
-    Route::post('/auth/otp', [\App\Http\Controllers\Auth\OtpController::class, 'store'])->name('auth.otp.verify');
+    Route::post('/auth/otp/resend', [\App\Http\Controllers\Auth\OtpController::class, 'resend'])->name('auth.otp.resend');
+});
 
-    Route::get('/auth/totp',  [\App\Http\Controllers\Auth\TotpController::class, 'create'])->name('auth.totp.form');
+Route::get('/auth/totp',  [\App\Http\Controllers\Auth\TotpController::class, 'create'])->middleware('auth.challenge:totp')->name('auth.totp.form');
+
+Route::middleware(['throttle:otp'])->group(function () {
+    Route::post('/auth/otp', [\App\Http\Controllers\Auth\OtpController::class, 'store'])->name('auth.otp.verify');
     Route::post('/auth/totp', [\App\Http\Controllers\Auth\TotpController::class, 'store'])->name('auth.totp.verify');
 });
 
@@ -43,7 +47,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('settings/security/totp/enable', [\App\Http\Controllers\Profile\SecurityController::class, 'totpEnable'])->name('settings.security.totp.enable');
     Route::post('settings/security/totp/disable', [\App\Http\Controllers\Profile\SecurityController::class, 'totpDisable'])->name('settings.security.totp.disable');
 
-
-    Route::delete('/security/sessions/others', [\App\Http\Controllers\Profile\SessionsController::class, 'settings.sessions.destroyOthers'])
-        ->name('security.sessions.others');
+    Route::delete('/security/sessions/others', [\App\Http\Controllers\Profile\SessionsController::class, 'destroyOthers'])
+        ->name('security.sessions.destroyOthers');
 });
