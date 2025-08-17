@@ -1,50 +1,73 @@
 <script setup lang="ts">
-const props = defineProps<{
-    title?: string;
-    description?: string;
-}>();
+import { computed, ref } from 'vue';
+
+const props = withDefaults(
+    defineProps<{
+        title?: string;
+        description?: string;
+        variant?: 'cover' | 'boxed';
+        coverImage?: string;
+        showAside?: boolean;
+    }>(),
+    {
+        variant: 'boxed',
+        showAside: true,
+    },
+);
+
+const isCover = computed(() => props.variant === 'cover');
+const imgFailed = ref(false);
 </script>
 
 <template>
-    <div class="grid min-h-screen bg-slate-50 text-slate-900 lg:grid-cols-2 dark:bg-slate-950 dark:text-slate-100">
-        <!-- Aside (brand/ilustrasi) -->
-        <aside class="relative hidden items-center justify-center overflow-hidden p-12 lg:flex">
+    <div class="relative min-h-svh overflow-hidden bg-background text-foreground" :class="isCover ? 'grid lg:grid-cols-2' : 'grid'">
+        <aside v-if="isCover && showAside" class="relative hidden overflow-hidden lg:block">
+            <img
+                v-if="coverImage && !imgFailed"
+                :src="coverImage"
+                class="absolute inset-0 h-full w-full object-cover"
+                alt="Auth cover"
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer"
+                @error="imgFailed = true"
+            />
             <div
-                class="absolute inset-0 -z-10 opacity-70 blur-3xl dark:opacity-60"
-                aria-hidden="true"
+                class="absolute inset-0"
                 style="
                     background:
+                        linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(139, 92, 246, 0.25)),
                         radial-gradient(1000px 600px at 20% 20%, rgba(99, 102, 241, 0.25), transparent 60%),
                         radial-gradient(800px 500px at 80% 60%, rgba(236, 72, 153, 0.25), transparent 60%);
                 "
             ></div>
-            <div class="max-w-md">
-                <slot name="aside">
-                    <h2 class="text-3xl font-semibold tracking-tight">Selamat datang di Topupin</h2>
-                    <p class="mt-3 text-slate-600 dark:text-slate-300">
-                        Platform topup pulsa & game yang cepat, aman, dan bersih. Masuk untuk melanjutkan.
-                    </p>
-                </slot>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
+
+            <div class="relative z-10 flex h-full items-end p-12">
+                <div class="max-w-xl text-white">
+                    <slot name="aside">
+                        <h2 class="text-3xl font-semibold drop-shadow-sm">Welcome back 👋</h2>
+                        <p class="mt-3 text-white/80">Seamless top-ups for phone &amp; games. Fast, secure, reliable.</p>
+                    </slot>
+                </div>
             </div>
         </aside>
 
-        <!-- Main (form auth) -->
-        <main class="flex min-h-screen items-center justify-center px-4 py-10">
+        <main class="relative flex min-h-svh items-center justify-center px-4 py-10">
             <div class="w-full max-w-md">
-                <!-- Kartu form -->
-                <section class="rounded-2xl bg-white/90 p-6 shadow-md backdrop-blur dark:bg-slate-900/60">
-                    <header class="mb-5">
-                        <h1 class="text-2xl font-semibold">{{ props.title ?? 'Masuk' }}</h1>
-                        <p v-if="props.description" class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                            {{ props.description }}
-                        </p>
+                <section class="rounded-2xl border border-border/60 bg-card/90 p-6 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/70">
+                    <header class="mb-6">
+                        <h1 class="text-2xl font-semibold">{{ title ?? 'Sign in' }}</h1>
+                        <p v-if="description" class="mt-1 text-sm text-muted-foreground">{{ description }}</p>
                     </header>
 
-                    <!-- Konten form dari halaman -->
                     <div class="space-y-4">
                         <slot />
                     </div>
                 </section>
+
+                <footer class="mt-6 text-center text-xs text-muted-foreground">
+                    <slot name="footer" />
+                </footer>
             </div>
         </main>
     </div>

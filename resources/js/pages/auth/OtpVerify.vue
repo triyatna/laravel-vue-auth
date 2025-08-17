@@ -50,7 +50,11 @@ const submit = () => {
                 <p class="text-xs text-muted-foreground">OTP valid for a few minutes. Do not share with anyone.</p>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="form.processing">
+            <Button
+                type="submit"
+                class="mt-2 w-full cursor-pointer bg-primary transition-all hover:-translate-y-0.5 hover:bg-violet-500 hover:shadow-lg hover:saturate-125 active:translate-y-0 active:shadow-md disabled:cursor-not-allowed"
+                :disabled="form.processing"
+            >
                 <LoaderCircle v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
                 Verify
             </Button>

@@ -13,7 +13,6 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits<{ (e: 'updated'): void }>();
 
-/* UI state */
 const showSheet = ref(false);
 const showCrop = ref(false);
 function openSheet() {
@@ -38,7 +37,6 @@ onMounted(() => {
         else mql.removeListener(handler as any);
     });
 });
-/* Sumber & preview lokal (agar langsung berubah) */
 const runtimeUrl = ref<string | null>(props.currentUrl ?? null);
 watch(
     () => props.currentUrl,
@@ -48,17 +46,15 @@ watch(
 );
 
 const hasAvatar = computed(() => !!runtimeUrl.value);
-const isAdding = ref(false); // untuk title modal: Add vs Edit
+const isAdding = ref(false);
 
-const previewUrl = ref<string | null>(null); // objectURL file terpilih
+const previewUrl = ref<string | null>(null);
 const imgEl = new Image();
 imgEl.decoding = 'async';
 
-/* Canvas refs */
 const viewCanvas = ref<HTMLCanvasElement | null>(null);
 const prevCanvas = ref<HTMLCanvasElement | null>(null);
 
-/* Transform */
 const scale = ref(1);
 let minScale = 1;
 const maxScaleFactor = 4;
@@ -69,11 +65,9 @@ let dragging = false;
 let lastX = 0,
     lastY = 0;
 
-/* Form */
 const form = useForm<{ avatar: File | null }>({ avatar: null });
 const removing = ref(false);
 
-/* Event handlers */
 function openPreview() {
     if (runtimeUrl.value) window.open(runtimeUrl.value, '_blank');
 }
@@ -86,7 +80,7 @@ function onPickFile(e: Event) {
         autoCropAndUpload(file);
         return;
     }
-    isAdding.value = !hasAvatar.value; // tandai mode saat mulai upload
+    isAdding.value = !hasAvatar.value;
     if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
     previewUrl.value = URL.createObjectURL(file);
     imgEl.onload = () => nextTick(setupViewport);
@@ -106,7 +100,6 @@ function autoCropAndUpload(file: File) {
         const iw = img.naturalWidth;
         const ih = img.naturalHeight;
 
-        // object-fit: cover (isi penuh, crop tengah)
         const scale = Math.max(size / iw, size / ih);
         const sw = iw * scale;
         const sh = ih * scale;
@@ -123,16 +116,14 @@ function autoCropAndUpload(file: File) {
                 }
                 const out = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
 
-                // Preview lokal cepat
                 if (runtimeUrl.value?.startsWith('blob:')) URL.revokeObjectURL(runtimeUrl.value);
                 runtimeUrl.value = URL.createObjectURL(out);
 
-                // Upload ke server
                 form.avatar = out;
                 form.post(props.uploadRoute, {
                     forceFormData: true,
                     onSuccess: () => {
-                        router.reload({ only: ['auth'] }); // refresh avatar global
+                        router.reload({ only: ['auth'] });
                         emit('updated');
                     },
                     onFinish: () => URL.revokeObjectURL(url),
@@ -299,7 +290,6 @@ function drawToPreview(cvs: HTMLCanvasElement | null, size = 96) {
     ctx.restore();
 }
 
-/* Save 512x512 + auto-refresh global */
 function saveCropped() {
     const size = 512;
     const cvs = document.createElement('canvas');
@@ -319,11 +309,9 @@ function saveCropped() {
             if (!blob) return;
             const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
 
-            // 1) Update preview lokal segera
             if (runtimeUrl.value?.startsWith('blob:')) URL.revokeObjectURL(runtimeUrl.value);
             runtimeUrl.value = URL.createObjectURL(file);
 
-            // 2) Kirim ke server
             form.avatar = file;
             form.post(props.uploadRoute, {
                 forceFormData: true,
@@ -339,7 +327,6 @@ function saveCropped() {
     );
 }
 
-/* Remove + auto-refresh global */
 function removeAvatar() {
     removing.value = true;
     form.delete(props.deleteRoute, {
@@ -353,7 +340,6 @@ function removeAvatar() {
     });
 }
 
-/* Cleanup */
 const cleanupFns: Array<() => void> = [];
 onBeforeUnmount(() => {
     cleanupFns.forEach((fn) => fn());
@@ -371,7 +357,6 @@ function cancelCrop() {
 
 <template>
     <div class="flex items-center gap-5">
-        <!-- Avatar -->
         <div class="flex flex-col items-center md:flex-row">
             <div class="relative m-4 h-24 w-24">
                 <img
@@ -388,7 +373,6 @@ function cancelCrop() {
                     {{ (fallbackInitials || 'U').slice(0, 2).toUpperCase() }}
                 </div>
 
-                <!-- Overlay button: Add (no avatar) / Edit (has avatar) -->
                 <button
                     type="button"
                     class="group absolute inset-0 grid place-items-center rounded-full bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100"
@@ -408,7 +392,6 @@ function cancelCrop() {
         </div>
     </div>
 
-    <!-- Action sheet -->
     <transition
         enter-active-class="transition ease-out duration-150"
         enter-from-class="opacity-0"
@@ -422,14 +405,12 @@ function cancelCrop() {
                 class="w-full max-w-md overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900"
             >
                 <div class="divide-y divide-neutral-200 dark:divide-neutral-800">
-                    <!-- Upload / Change (selalu ada) -->
                     <label class="flex cursor-pointer items-center gap-2 px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800/60">
                         <Upload class="h-4 w-4" />
                         <span>{{ hasAvatar ? 'Change photo' : 'Upload photo' }}</span>
                         <input class="sr-only" type="file" accept="image/png,image/jpeg,image/webp" @change="onPickFile" />
                     </label>
 
-                    <!-- Hanya tampil jika sudah ada avatar -->
                     <template v-if="hasAvatar">
                         <button
                             class="flex w-full items-center gap-2 px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-800/60"
@@ -457,7 +438,6 @@ function cancelCrop() {
         </div>
     </transition>
 
-    <!-- Crop modal -->
     <transition
         enter-active-class="transition ease-out duration-150"
         enter-from-class="opacity-0"
@@ -516,7 +496,6 @@ function cancelCrop() {
                                     <div class="h-24 w-24 overflow-hidden rounded-full ring-1 ring-neutral-200 dark:ring-neutral-800">
                                         <canvas ref="prevCanvas" class="h-full w-full"></canvas>
                                     </div>
-                                    <div class="text-xs text-neutral-500">Preview</div>
                                 </div>
                             </div>
                         </div>

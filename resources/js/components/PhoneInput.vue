@@ -38,7 +38,6 @@ const defaultCountry = COUNTRIES.find((c) => c.iso === (props.defaultIso || 'ID'
 const selected = ref<Country>(defaultCountry);
 const localNumber = ref('');
 
-/* Dropdown & search */
 const open = ref(false);
 const query = ref('');
 const filtered = computed(() => COUNTRIES.filter((c) => (c.name + c.iso + c.dial).toLowerCase().includes(query.value.toLowerCase())));
@@ -51,7 +50,6 @@ function choose(c: Country) {
     open.value = false;
 }
 
-/* Close saat klik di luar / Esc */
 function onDocClick(e: MouseEvent) {
     const root = containerRef.value;
     if (!root) return;
@@ -104,7 +102,6 @@ function hydrateFromModel(val: string) {
     }
 }
 
-/* Sinkronisasi dua arah */
 watch(
     () => props.modelValue,
     (v) => {
@@ -127,7 +124,6 @@ watch([selected, () => localNumber.value], () => {
             class="flex items-stretch overflow-hidden rounded-xl bg-white/80 ring-1 ring-slate-200 ring-inset focus-within:ring-2 focus-within:ring-indigo-500 dark:bg-slate-900/60 dark:ring-slate-700"
             :class="!isValid && localNumber ? 'ring-rose-300 focus-within:ring-rose-500 dark:ring-rose-800' : ''"
         >
-            <!-- Prefix: FLAG/ISO + +CODE -->
             <button
                 type="button"
                 class="flex min-w-[90px] items-center gap-2 px-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
@@ -182,7 +178,6 @@ watch([selected, () => localNumber.value], () => {
             />
         </div>
 
-        <!-- Country list -->
         <div
             v-if="open"
             class="absolute z-50 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-md dark:border-slate-800 dark:bg-slate-900"

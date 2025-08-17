@@ -42,7 +42,10 @@ const submit = () => {
                 </div>
 
                 <div class="flex items-center">
-                    <Button class="w-full" :disabled="form.processing">
+                    <Button
+                        class="mt-2 w-full cursor-pointer bg-primary transition-all hover:-translate-y-0.5 hover:bg-violet-500 hover:shadow-lg hover:saturate-125 active:translate-y-0 active:shadow-md disabled:cursor-not-allowed"
+                        :disabled="form.processing"
+                    >
                         <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                         Confirm Password
                     </Button>
