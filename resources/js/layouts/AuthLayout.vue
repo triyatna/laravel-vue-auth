@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { computed, ref } from 'vue';
-
 const props = withDefaults(
     defineProps<{
         title?: string;
@@ -8,10 +8,12 @@ const props = withDefaults(
         variant?: 'cover' | 'boxed';
         coverImage?: string;
         showAside?: boolean;
+        showLogo?: boolean;
     }>(),
     {
         variant: 'boxed',
         showAside: true,
+        showLogo: false,
     },
 );
 
@@ -54,6 +56,7 @@ const imgFailed = ref(false);
 
         <main class="relative flex min-h-svh items-center justify-center px-4 py-10">
             <div class="w-full max-w-md">
+                <AppLogoIcon v-if="showLogo" class="mx-auto my-4 block size-12 fill-current text-black dark:text-white" />
                 <section class="rounded-2xl border border-border/60 bg-card/90 p-6 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/70">
                     <header class="mb-6">
                         <h1 class="text-2xl font-semibold">{{ title ?? 'Sign in' }}</h1>

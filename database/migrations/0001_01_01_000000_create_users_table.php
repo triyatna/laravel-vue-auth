@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('phone')->nullable();
-            $table->enum('role', ['member', 'staf', 'admin'])->default('member');
+            $table->enum('role', ['member', 'staff', 'admin'])->default('member')->index();
             $table->string('avatar_path')->nullable();
             $table->string('referral_code')->nullable();
             $table->rememberToken();
@@ -30,6 +30,7 @@ return new class extends Migration
             $table->timestamp('last_login_at')->nullable();
             $table->string('last_login_ip', 45)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
